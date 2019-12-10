@@ -22,11 +22,14 @@ We can run the transcoding service in one of two ways:
 
 or
 
-* [offline mode](offline.md)
+* [offline b/o/t mode](offline_b_o_t.md)
+* [offline b/ot mode](offline_b_ot.md)
 
 As an alternative to the manual installation steps described above, the Livepeer B/O/T network can be installed using `docker-compose`:
 
 * [docker-compose setup: b/o/t offchain](ubuntu/cuda-docker-compose-setup-b_o_t-offchain)
+* [docker-compose setup: b/ot offchain](ubuntu/cuda-docker-compose-setup-b_ot-offchain)
 * [docker-compose setup: b/o/t rinkeby testnet](ubuntu/cuda-docker-compose-setup-b_o_t-rinkeby)
+* [docker-compose setup: b/ot rinkeby testnet](ubuntu/cuda-docker-compose-setup-b_ot-rinkeby)
 
 For some basic information about running benchmarks, see [benchmarks](benchmarks.md)
