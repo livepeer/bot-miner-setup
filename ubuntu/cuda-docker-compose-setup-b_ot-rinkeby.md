@@ -73,21 +73,28 @@ nano docker-compose.yml
 ```yaml
 version: '3.5'
 services:
-  orchestrator:
+  orchtran:
     image: livepeer/go-livepeer:master
-    command: '-network rinkeby -orchestrator -transcoder -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -initializeRound=true -pricePerUnit 1 -nvidia 0'
+    command: '-network rinkeby -orchestrator -transcoder -serviceAddr orchtran:8935 -orchAddr 0.0.0.0 -initializeRound=true -pricePerUnit 1 -nvidia 0'
     ports:
       - 7935:7935
       - 8935:8935
+    volumes:
+      - orchroot:/root
   broadcaster:
     depends_on:
-      - orchestrator
+      - orchtran
     image: livepeer/go-livepeer:master
-    command: '-broadcaster -network rinkeby -rtmpAddr broadcaster -orchAddr orchestrator:8935 -cliAddr broadcaster:7936 -httpAddr broadcaster:8936 -depositMultiplier 1'
+    command: '-broadcaster -network rinkeby -rtmpAddr broadcaster -orchAddr orchtran:8935 -cliAddr broadcaster:7936 -httpAddr broadcaster:8936 -depositMultiplier 1'
     ports:
       - 1935:1935
       - 7936:7936
       - 8936:8936
+    volumes:
+      - bcstroot:/root
+volumes:
+  orchroot:
+  bcstroot:
 ```
 
 If you have multiple GPU's, adjust the `-nvidia` option on the transcoder container's command line to account for them.
@@ -96,7 +103,39 @@ If you don't have any Nvidia GPUs, remove the `-nvidia 0` option from the transc
 
 Hit `CTRL-X` to save and exit.  When prompted, hit the `Y` key followed by `ENTER`.
 
-* Start the B/O/T network using the following command:
+* Before starting the B/OT network, we must initiatize an ethereum account.  Begin by bringing up the orchestrator/transcoder alone using interactive mode:
+
+```bash
+sudo docker-compose run orchtran
+```
+
+go-livepeer will prompt for a passphrase.  Enter one and then press `ENTER` to continue.  It will ask you to repeat the passphrase, then enter it again to unlock the new ethereum account.
+
+After this is done, go-livepeer may shut down.  Feel free to stop it using `CTRL-C` if it doesnt shut down by itself after some time.
+
+* Edit the `docker-compose.yml` to add the `ethPassword` argument to the orchtran command line.  The new command should look like this:
+
+```bash
+-network rinkeby -orchestrator -transcoder -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -initializeRound=true -pricePerUnit 1 -nvidia 0 -ethPassword=passphrase
+```
+
+* Next, we must initialize an ethereum account for the broadcaster.  Bring up the broadcaster using interactive mode:
+
+```bash
+sudo docker-compose run broadcaster
+```
+
+go-livepeer will prompt for a passphrase.  Enter one and then press `ENTER` to continue.  It will ask you to repeat the passphrase, then enter it again to unlock the new ethereum account.
+
+After this is done, go-livepeer may shut down.  Feel free to stop it using `CTRL-C` if it doesnt shut down by itself after some time.
+
+* Edit the `docker-compose.yml` to add the `ethPassword` argument to the broadcaster command line.  The new command should look like this:
+
+```bash
+-broadcaster -network rinkeby -rtmpAddr broadcaster -orchAddr orchestrator:8935 -cliAddr broadcaster:7936 -httpAddr broadcaster:8936 -depositMultiplier 1 -ethPassword=passphrase
+```
+
+* Start the B/OT network using the following command:
 
 ```bash
 sudo docker-compose up
@@ -104,29 +143,43 @@ sudo docker-compose up
 
 You should see output similar to:
 
-```
-Starting botnetworkcomposed_orchestrator_1 ... 
-Starting botnetworkcomposed_orchestrator_1 ... done
-Starting botnetworkcomposed_broadcaster_1 ... 
-Starting botnetworkcomposed_broadcaster_1 ... done
-Attaching to botnetworkcomposed_orchestrator_1, botnetworkcomposed_broadcaster_1
-orchestrator_1  | I1204 21:12:42.359095       1 livepeer.go:201] ***Livepeer is running on the offchain network***
-orchestrator_1  | I1204 21:12:42.363834       1 livepeer.go:292] ***Livepeer is in off-chain mode***
-orchestrator_1  | I1204 21:12:42.363988       1 livepeer.go:740] ***Livepeer Running in Orchestrator Mode***
-orchestrator_1  | I1204 21:12:42.364113       1 webserver.go:68] CLI server listening on 127.0.0.1:7935
-orchestrator_1  | I1204 21:12:42.364265       1 cert.go:83] Private key and cert not found. Generating
-orchestrator_1  | I1204 21:12:42.394777       1 cert.go:22] Generating cert for orchestrator
-orchestrator_1  | I1204 21:12:42.395576       1 rpc.go:147] Listening for RPC on :8935
-broadcaster_1   | I1204 21:12:43.338729       1 livepeer.go:201] ***Livepeer is running on the offchain network***
-broadcaster_1   | I1204 21:12:43.340571       1 livepeer.go:292] ***Livepeer is in off-chain mode***
-broadcaster_1   | I1204 21:12:43.341058       1 livepeer.go:742] ***Livepeer Running in Broadcaster Mode***
-broadcaster_1   | I1204 21:12:43.341361       1 webserver.go:68] CLI server listening on broadcaster:7936
-broadcaster_1   | I1204 21:12:43.341738       1 livepeer.go:743] Video Ingest Endpoint - rtmp://broadcaster:1935
-orchestrator_1  | I1204 21:12:44.364588       1 rpc.go:215] Connecting RPC to https://orchestrator:8935
-orchestrator_1  | I1204 21:12:44.372509       1 rpc.go:187] Received Ping request
+```Recreating michael_orchtran_1 ... 
+Recreating michael_orchtran_1 ... done
+Recreating michael_broadcaster_1 ... 
+Recreating michael_broadcaster_1 ... done
+Attaching to michael_orchtran_1, michael_broadcaster_1
+orchtran_1     | I1210 18:27:15.858357       1 livepeer.go:199] ***Livepeer is running on the rinkeby network: 0xA268AEa9D048F8d3A592dD7f1821297972D4C8Ea***
+orchtran_1     | I1210 18:27:16.175813       1 accountmanager.go:70] Using Ethereum account: 0x02452e64DA3959f7b3e487e27a8CD672808e49C2
+broadcaster_1  | I1210 18:27:17.321270       1 livepeer.go:199] ***Livepeer is running on the rinkeby network: 0xA268AEa9D048F8d3A592dD7f1821297972D4C8Ea***
+broadcaster_1  | I1210 18:27:17.576022       1 accountmanager.go:70] Using Ethereum account: 0x7fe2e5bb9Ea5533c68A011466880FB6Bbaa2115A
+orchtran_1     | I1210 18:27:17.673865       1 accountmanager.go:99] Unlocked ETH account: 0x02452e64DA3959f7b3e487e27a8CD672808e49C2
+orchtran_1     | I1210 18:27:18.091648       1 livepeer.go:463] Price: 1 wei for 1 pixels
+orchtran_1     |  
+orchtran_1     | I1210 18:27:18.149597       1 livepeer.go:860] Orchestrator 0x02452e64DA3959f7b3e487e27a8CD672808e49C2 is inactive
+orchtran_1     | I1210 18:27:18.234251       1 block_watcher.go:318] Backfilling block events (this can take a while)...
+orchtran_1     | I1210 18:27:18.234840       1 block_watcher.go:319] Start block: 5590875                End block: 5590878             Blocks elapsed: 3
+orchtran_1     | I1210 18:27:18.251527       1 block_watcher.go:537] fetching block logs from=5590875 to=5590878
+orchtran_1     | I1210 18:27:18.382191       1 livepeer.go:740] ***Livepeer Running in Orchestrator Mode***
+orchtran_1     | I1210 18:27:18.382360       1 webserver.go:68] CLI server listening on 127.0.0.1:7935
+orchtran_1     | I1210 18:27:18.382684       1 cert.go:83] Private key and cert not found. Generating
+orchtran_1     | I1210 18:27:18.382970       1 cert.go:22] Generating cert for orchtran
+orchtran_1     | I1210 18:27:18.383456       1 rpc.go:147] Listening for RPC on :8935
+broadcaster_1  | I1210 18:27:18.623740       1 accountmanager.go:99] Unlocked ETH account: 0x7fe2e5bb9Ea5533c68A011466880FB6Bbaa2115A
+broadcaster_1  | I1210 18:27:19.294466       1 livepeer.go:563] Maximum transcoding price per pixel is not greater than 0: 0, broadcaster is currently set to accept ANY price.
+broadcaster_1  | I1210 18:27:19.294542       1 livepeer.go:564] To update the broadcaster's maximum acceptable transcoding price per pixel, use the CLI or restart the broadcaster with the appropriate 'maxPricePerUnit' and 'pixelsPerUnit' values
+broadcaster_1  | I1210 18:27:19.338526       1 block_watcher.go:318] Backfilling block events (this can take a while)...
+broadcaster_1  | I1210 18:27:19.338552       1 block_watcher.go:319] Start block: 5590875                End block: 5590878             Blocks elapsed: 3
+broadcaster_1  | I1210 18:27:19.342778       1 block_watcher.go:537] fetching block logs from=5590875 to=5590878
+broadcaster_1  | I1210 18:27:19.460729       1 livepeer.go:742] ***Livepeer Running in Broadcaster Mode***
+broadcaster_1  | I1210 18:27:19.460782       1 livepeer.go:743] Video Ingest Endpoint - rtmp://broadcaster:1935
+broadcaster_1  | I1210 18:27:19.460908       1 webserver.go:68] CLI server listening on broadcaster:7936
+orchtran_1     | I1210 18:27:20.383165       1 rpc.go:215] Connecting RPC to https://orchtran:8935
+orchtran_1     | I1210 18:27:20.387275       1 rpc.go:187] Received Ping request
 ```
 
 Leave this running.
+
+* You will have to acquire testnet eth and lpt before proceeding.  That process is outside the scope of this document.  See [livepeer.readthedocs.io](https://livepeer.readthedocs.io/en/latest/streamflow-public-testnet.html)
 
 * In another terminal, stream into port 1935 using `ffmpeg`
 

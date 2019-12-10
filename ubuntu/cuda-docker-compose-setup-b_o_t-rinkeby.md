@@ -79,6 +79,8 @@ services:
     ports:
       - 7935:7935
       - 8935:8935
+    volumes:
+      - orchroot:/root
   transcoder:
     depends_on:
       - orchestrator
@@ -94,6 +96,11 @@ services:
       - 1935:1935
       - 7936:7936
       - 8936:8936
+    volumes:
+      - bcstroot:/root
+volumes:
+  orchroot:
+  bcstroot:
 ```
 
 If you have multiple GPU's, adjust the `-nvidia` option on the transcoder container's command line to account for them.
@@ -101,6 +108,38 @@ For example, for two Nvidia GPUs, specify `-nvidia 0,1`
 If you don't have any Nvidia GPUs, remove the `-nvidia 0` option from the transcoder container command line.
 
 Hit `CTRL-X` to save and exit.  When prompted, hit the `Y` key followed by `ENTER`.
+
+* Before starting the B/O/T network, we must initiatize an ethereum account.  Begin by bringing up the orchestrator alone using interactive mode:
+
+```bash
+sudo docker-compose run orchestrator
+```
+
+go-livepeer will prompt for a passphrase.  Enter one and then press `ENTER` to continue.  It will ask you to repeat the passphrase, then enter it again to unlock the new ethereum account.
+
+After this is done, go-livepeer may shut down.  Feel free to stop it using `CTRL-C` if it doesnt shut down by itself after some time.
+
+* Edit the `docker-compose.yml` to add the `ethPassword` argument to the orchestrator command line.  The new command should look like this:
+
+```bash
+-orchestrator --network rinkeby -orchSecret test -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -pricePerUnit 1 -initializeRound=true -ethPassword=passphrase
+```
+
+* Next, we must initialize an ethereum account for the broadcaster.  Bring up the broadcaster using interactive mode:
+
+```bash
+sudo docker-compose run broadcaster
+```
+
+go-livepeer will prompt for a passphrase.  Enter one and then press `ENTER` to continue.  It will ask you to repeat the passphrase, then enter it again to unlock the new ethereum account.
+
+After this is done, go-livepeer may shut down.  Feel free to stop it using `CTRL-C` if it doesnt shut down by itself after some time.
+
+* Edit the `docker-compose.yml` to add the `ethPassword` argument to the broadcaster command line.  The new command should look like this:
+
+```bash
+-broadcaster -network rinkeby -rtmpAddr broadcaster -orchAddr orchestrator:8935 -cliAddr broadcaster:7936 -httpAddr broadcaster:8936 -depositMultiplier 1 -ethPassword=passphrase
+```
 
 * Start the B/O/T network using the following command:
 
@@ -111,34 +150,60 @@ sudo docker-compose up
 You should see output similar to:
 
 ```
-Starting botnetworkcomposed_orchestrator_1 ... 
-Starting botnetworkcomposed_orchestrator_1 ... done
-Starting botnetworkcomposed_transcoder_1 ... 
-Starting botnetworkcomposed_transcoder_1 ... done
-Starting botnetworkcomposed_broadcaster_1 ... 
-Starting botnetworkcomposed_broadcaster_1 ... done
-Attaching to botnetworkcomposed_orchestrator_1, botnetworkcomposed_transcoder_1, botnetworkcomposed_broadcaster_1
-orchestrator_1  | I1006 18:42:24.729607       1 livepeer.go:205] ***Livepeer is running on the offchain*** network
-orchestrator_1  | I1006 18:42:24.740214       1 livepeer.go:295] ***Livepeer is in off-chain mode***
-orchestrator_1  | I1006 18:42:24.740609       1 webserver.go:65] CLI server listening on 127.0.0.1:7935
-orchestrator_1  | I1006 18:42:24.741034       1 livepeer.go:682] ***Livepeer Running in Orchestrator Mode***
-orchestrator_1  | I1006 18:42:24.741193       1 cert.go:83] Private key and cert not found. Generating
-transcoder_1    | I1006 18:42:26.341787       1 livepeer.go:205] ***Livepeer is running on the offchain*** network
-orchestrator_1  | I1006 18:42:24.761638       1 cert.go:22] Generating cert for orchestrator
-orchestrator_1  | I1006 18:42:24.762918       1 rpc.go:152] Listening for RPC on :8935
-broadcaster_1   | I1006 18:42:27.967617       1 livepeer.go:205] ***Livepeer is running on the offchain*** network
-transcoder_1    | I1006 18:42:26.342908       1 livepeer.go:281] ***Livepeer is in transcoder mode ***
-transcoder_1    | I1006 18:42:26.342943       1 ot_rpc.go:50] Registering transcoder to orchestrator:8935
-orchestrator_1  | I1006 18:42:26.354784       1 ot_rpc.go:191] Got a RegisterTranscoder request from transcoder=172.18.0.3:45382 capacity=10
-broadcaster_1   | I1006 18:42:27.969054       1 livepeer.go:295] ***Livepeer is in off-chain mode***
-orchestrator_1  | I1006 18:42:26.741187       1 rpc.go:220] Connecting RPC to https://orchestrator:8935
-orchestrator_1  | I1006 18:42:26.744904       1 rpc.go:192] Received Ping request
-broadcaster_1   | I1006 18:42:27.969124       1 livepeer.go:684] ***Livepeer Running in Broadcaster Mode***
-broadcaster_1   | I1006 18:42:27.969154       1 livepeer.go:685] Video Ingest Endpoint - rtmp://broadcaster:1935
-broadcaster_1   | I1006 18:42:27.969268       1 webserver.go:65] CLI server listening on broadcaster:7936
+Creating network "michael_default" with the default driver
+Creating michael_orchestrator_1 ... 
+Creating michael_orchestrator_1 ... done
+Creating michael_transcoder_1 ... 
+Creating michael_transcoder_1 ... done
+Creating michael_broadcaster_1 ... 
+Creating michael_broadcaster_1 ... done
+Attaching to michael_orchestrator_1, michael_transcoder_1, michael_broadcaster_1
+orchestrator_1  | I1210 17:20:22.018354       1 livepeer.go:199] ***Livepeer is running on the rinkeby network: 0xA268AEa9D048F8d3A592dD7f1821297972D4C8Ea***
+transcoder_1    | I1210 17:20:23.307593       1 livepeer.go:199] ***Livepeer is running on the rinkeby network: 0xA268AEa9D048F8d3A592dD7f1821297972D4C8Ea***
+orchestrator_1  | I1210 17:20:22.401746       1 accountmanager.go:70] Using Ethereum account: 0x02452e64DA3959f7b3e487e27a8CD672808e49C2
+orchestrator_1  | I1210 17:20:24.021618       1 accountmanager.go:99] Unlocked ETH account: 0x02452e64DA3959f7b3e487e27a8CD672808e49C2
+transcoder_1    | I1210 17:20:23.307915       1 livepeer.go:214] Creating data dir: /root/.lpData/rinkeby
+broadcaster_1   | I1210 17:20:24.497440       1 livepeer.go:199] ***Livepeer is running on the rinkeby network: 0xA268AEa9D048F8d3A592dD7f1821297972D4C8Ea***
+orchestrator_1  | I1210 17:20:24.507397       1 livepeer.go:463] Price: 1 wei for 1 pixels
+orchestrator_1  |  
+transcoder_1    | I1210 17:20:23.406314       1 livepeer.go:277] ***Livepeer is in transcoder mode ***
+transcoder_1    | I1210 17:20:23.406378       1 ot_rpc.go:50] Registering transcoder to orchestrator:8935
+transcoder_1    | E1210 17:20:23.412110       1 ot_rpc.go:96] Could not register transcoder to orchestrator rpc error: code = Unavailable desc = all SubConns are in TransientFailure, latest connection error: connection error: desc = "transport: Error while dialing dial tcp 172.21.0.2:8935: connect: connection refused"
+transcoder_1    | I1210 17:20:23.412190       1 ot_rpc.go:52] Unregistering transcoder: rpc error: code = Unavailable desc = all SubConns are in TransientFailure, latest connection error: connection error: desc = "transport: Error while dialing dial tcp 172.21.0.2:8935: connect: connection refused"
+transcoder_1    | I1210 17:20:23.960117       1 ot_rpc.go:50] Registering transcoder to orchestrator:8935
+transcoder_1    | E1210 17:20:23.961343       1 ot_rpc.go:96] Could not register transcoder to orchestrator rpc error: code = Unavailable desc = all SubConns are in TransientFailure, latest connection error: connection error: desc = "transport: Error while dialing dial tcp 172.21.0.2:8935: connect: connection refused"
+transcoder_1    | I1210 17:20:23.961366       1 ot_rpc.go:52] Unregistering transcoder: rpc error: code = Unavailable desc = all SubConns are in TransientFailure, latest connection error: connection error: desc = "transport: Error while dialing dial tcp 172.21.0.2:8935: connect: connection refused"
+orchestrator_1  | I1210 17:20:24.560797       1 livepeer.go:860] Orchestrator 0x02452e64DA3959f7b3e487e27a8CD672808e49C2 is inactive
+transcoder_1    | I1210 17:20:24.617384       1 ot_rpc.go:50] Registering transcoder to orchestrator:8935
+transcoder_1    | E1210 17:20:24.619310       1 ot_rpc.go:96] Could not register transcoder to orchestrator rpc error: code = Unavailable desc = all SubConns are in TransientFailure, latest connection error: connection error: desc = "transport: Error while dialing dial tcp 172.21.0.2:8935: connect: connection refused"
+transcoder_1    | I1210 17:20:24.619745       1 ot_rpc.go:52] Unregistering transcoder: rpc error: code = Unavailable desc = all SubConns are in TransientFailure, latest connection error: connection error: desc = "transport: Error while dialing dial tcp 172.21.0.2:8935: connect: connection refused"
+orchestrator_1  | I1210 17:20:24.671523       1 block_watcher.go:318] Backfilling block events (this can take a while)...
+orchestrator_1  | I1210 17:20:24.671549       1 block_watcher.go:319] Start block: 5590609               End block: 5590610             Blocks elapsed: 1
+orchestrator_1  | I1210 17:20:24.675363       1 block_watcher.go:537] fetching block logs from=5590609 to=5590610
+broadcaster_1   | I1210 17:20:24.703313       1 accountmanager.go:70] Using Ethereum account: 0x02452e64DA3959f7b3e487e27a8CD672808e49C2
+orchestrator_1  | I1210 17:20:24.869675       1 livepeer.go:740] ***Livepeer Running in Orchestrator Mode***
+orchestrator_1  | I1210 17:20:24.870334       1 webserver.go:68] CLI server listening on 127.0.0.1:7935
+orchestrator_1  | I1210 17:20:24.870467       1 cert.go:83] Private key and cert not found. Generating
+orchestrator_1  | I1210 17:20:24.871715       1 cert.go:22] Generating cert for orchestrator
+orchestrator_1  | I1210 17:20:24.872637       1 rpc.go:147] Listening for RPC on :8935
+broadcaster_1   | I1210 17:20:25.661966       1 accountmanager.go:99] Unlocked ETH account: 0x02452e64DA3959f7b3e487e27a8CD672808e49C2
+broadcaster_1   | I1210 17:20:26.152509       1 livepeer.go:563] Maximum transcoding price per pixel is not greater than 0: 0, broadcaster is currently set to accept ANY price.
+broadcaster_1   | I1210 17:20:26.152580       1 livepeer.go:564] To update the broadcaster's maximum acceptable transcoding price per pixel, use the CLI or restart the broadcaster with the appropriate 'maxPricePerUnit' and 'pixelsPerUnit' values
+broadcaster_1   | I1210 17:20:26.195800       1 block_watcher.go:318] Backfilling block events (this can take a while)...
+broadcaster_1   | I1210 17:20:26.195859       1 block_watcher.go:319] Start block: 5590611               End block: 5590610             Blocks elapsed: -1
+broadcaster_1   | I1210 17:20:26.200135       1 block_watcher.go:537] fetching block logs from=5590611 to=5590610
+transcoder_1    | I1210 17:20:26.245160       1 ot_rpc.go:50] Registering transcoder to orchestrator:8935
+broadcaster_1   | I1210 17:20:26.245411       1 webserver.go:68] CLI server listening on broadcaster:7936
+broadcaster_1   | I1210 17:20:26.246557       1 livepeer.go:742] ***Livepeer Running in Broadcaster Mode***
+broadcaster_1   | I1210 17:20:26.247455       1 livepeer.go:743] Video Ingest Endpoint - rtmp://broadcaster:1935
+orchestrator_1  | I1210 17:20:26.260520       1 ot_rpc.go:191] Got a RegisterTranscoder request from transcoder=172.21.0.3:44234 capacity=10
+orchestrator_1  | I1210 17:20:26.870927       1 rpc.go:215] Connecting RPC to https://orchestrator:8935
+orchestrator_1  | I1210 17:20:26.874302       1 rpc.go:187] Received Ping request
 ```
 
 Leave this running.
+
+* You will have to acquire testnet eth and lpt before proceeding.  That process is outside the scope of this document.  See [livepeer.readthedocs.io](https://livepeer.readthedocs.io/en/latest/streamflow-public-testnet.html)
 
 * In another terminal, stream into port 1935 using `ffmpeg`
 
