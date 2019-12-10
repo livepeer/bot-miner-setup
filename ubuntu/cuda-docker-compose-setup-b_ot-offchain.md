@@ -96,7 +96,7 @@ If you don't have any Nvidia GPUs, remove the `-nvidia 0` option from the transc
 
 Hit `CTRL-X` to save and exit.  When prompted, hit the `Y` key followed by `ENTER`.
 
-* Start the B/O/T network using the following command:
+* Start the B/OT network using the following command:
 
 ```bash
 sudo docker-compose up
