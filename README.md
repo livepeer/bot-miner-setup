@@ -26,6 +26,6 @@ or
 
 As an alternative to the manual installation steps described above, the Livepeer B/O/T network can be installed using `docker-compose`:
 
-* [docker-compose setup](ubuntu/cuda-docker-compose-setup.md)
+* [docker-compose setup: b/o/t offchain](ubuntu/cuda-docker-compose-setup-b_o_t-offchain)
 
 For some basic information about running benchmarks, see [benchmarks](benchmarks.md)
