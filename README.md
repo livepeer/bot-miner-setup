@@ -18,7 +18,7 @@ After following the [ethminer systemd setup](ubuntu/ethminer-systemd-setup.md) i
 
 We can run the transcoding service in one of two ways:
 
-* [testnet using the devtool](testnet.md)
+* [local testnet using the devtool](testnet-devtool.md)
 
 or
 
