@@ -16,7 +16,7 @@ Go through the following installation steps, in order:
 
 After following the [ethminer systemd setup](ubuntu/ethminer-systemd-setup.md) instructions, your GPUs will be mining Ethereum as a systemd service.
 
-We can run the transcoding service in one of two ways:
+We can run the transcoding service in offline mode using one of two ways:
 
 * [local testnet using the devtool](testnet-devtool.md)
 
@@ -24,6 +24,11 @@ or
 
 * [offline b/o/t mode](offline_b_o_t.md)
 * [offline b/ot mode](offline_b_ot.md)
+
+For a better idea of how things will behave on the network, we can run the service on the Rinkeby testnet:
+
+* [Rinkeby testnet b/o/t mode](testnet-rinkeby-b_o_t.md)
+* [Rinkeby testnet b/ot mode](testnet-rinkeby-b_ot.md)
 
 As an alternative to the manual installation steps described above, the Livepeer B/O/T network can be installed using `docker-compose`:
 
