@@ -169,6 +169,44 @@ echo MyEthPassPhrase > passphrase_bcst.txt
 -broadcaster -network rinkeby -rtmpAddr broadcaster -orchAddr orchestrator:8935 -cliAddr broadcaster:7936 -httpAddr broadcaster:8936 -depositMultiplier 1 -ethPassword=/root/pw.txt
 ```
 
+Now, we must fund the accounts with ETH and LPT.  We'll have to bring up the B/O/T network and then execute the CLI in another shell.
+
+* Start the B/O/T network using the following command:
+
+```bash
+sudo docker-compose up
+```
+
+* Using another shell, list the running containers to see their names:
+
+```bash
+docker container ls
+```
+
+* Start the orchestrator CLI with the following command (replace "orchestrator" with the actual container name as seen above):
+
+```bash
+docker container exec -it orchestrator livepeer_cli
+```
+
+* Follow the instructions in the CLI to first get some ETH, then some LPT.  After both are done, you may exit the CLI.
+
+* Start the broadcaster CLI with the following command (replace "broadcaster" with the actual container name as seen above):
+
+```bash
+docker container exec -it broadcaster livepeer_cli --http 7936 --host broadcaster
+```
+
+* Follow the instructions in the CLI to first get some ETH, then some LPT.  After both are done, you may exit the CLI.
+
+* You may leave the B/O/T network running if you like, but if you want to stop the B/O/T network, use the following command:
+
+```bash
+sudo docker-compose down
+```
+
+Now the system is ready to run!
+
 * Start the B/O/T network using the following command:
 
 ```bash
