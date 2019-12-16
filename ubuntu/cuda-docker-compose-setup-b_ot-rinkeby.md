@@ -113,10 +113,24 @@ go-livepeer will prompt for a passphrase.  Enter one and then press `ENTER` to c
 
 After this is done, go-livepeer may shut down.  Feel free to stop it using `CTRL-C` if it doesnt shut down by itself after some time.
 
+* Store your password in a file on disk in a secure location.
+
+```bash
+echo MyEthPassPhrase > passphrase_orch.txt
+```
+
+* Mount the file within the container by adding " - ./passphrase_orch.txt:/root/pw.txt" to the volumes section of the orchtran container in `docker-compose.yml`.  It should look like this:
+
+```yaml
+    volumes:
+      - orchroot:/root
+      - ./passphrase_orch.txt:/root/pw.txt
+```
+
 * Edit the `docker-compose.yml` to add the `ethPassword` argument to the orchtran command line.  The new command should look like this:
 
 ```bash
--network rinkeby -orchestrator -transcoder -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -initializeRound=true -pricePerUnit 1 -nvidia 0 -ethPassword=passphrase
+-network rinkeby -orchestrator -transcoder -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -initializeRound=true -pricePerUnit 1 -nvidia 0 -ethPassword=/root/pw.txt
 ```
 
 * Next, we must initialize an ethereum account for the broadcaster.  Bring up the broadcaster using interactive mode:
@@ -129,10 +143,24 @@ go-livepeer will prompt for a passphrase.  Enter one and then press `ENTER` to c
 
 After this is done, go-livepeer may shut down.  Feel free to stop it using `CTRL-C` if it doesnt shut down by itself after some time.
 
+* Store your password in a file on disk in a secure location.
+
+```bash
+echo MyEthPassPhrase > passphrase_bcst.txt
+```
+
+* Mount the file within the container by adding " - ./passphrase_bcst.txt:/root/pw.txt" to the volumes section of the broadcaster container in `docker-compose.yml`.  It should look like this:
+
+```yaml
+    volumes:
+      - bcstroot:/root
+      - ./passphrase_bcst.txt:/root/pw.txt
+```
+
 * Edit the `docker-compose.yml` to add the `ethPassword` argument to the broadcaster command line.  The new command should look like this:
 
 ```bash
--broadcaster -network rinkeby -rtmpAddr broadcaster -orchAddr orchestrator:8935 -cliAddr broadcaster:7936 -httpAddr broadcaster:8936 -depositMultiplier 1 -ethPassword=passphrase
+-broadcaster -network rinkeby -rtmpAddr broadcaster -orchAddr orchestrator:8935 -cliAddr broadcaster:7936 -httpAddr broadcaster:8936 -depositMultiplier 1 -ethPassword=/root/pw.txt
 ```
 
 * Start the B/OT network using the following command:
