@@ -30,7 +30,7 @@ Hit `<ENTER>` a few times to get to a command prompt.
 * Start an offline orchestrator on port 8935 with a secret.  Replace "test" with a secret of your own:
 
 ```bash
-./livepeer -orchestrator --network offchain -orchSecret test -serviceAddr 127.0.0.1:8935 -orchAddr 0.0.0.0:8935
+./livepeer -orchestrator -network offchain -orchSecret test -serviceAddr 127.0.0.1:8935 -orchAddr 0.0.0.0:8935
 ```
 
 * Once the broadcaster is running, hold `<CTRL>` and type `<A>` then `<D>` to leave the screen session running in the background.

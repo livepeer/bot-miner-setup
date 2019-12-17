@@ -30,7 +30,7 @@ Hit `<ENTER>` a few times to get to a command prompt.
 * Start an offline orchestrator/transcoder on port 8935:
 
 ```bash
-./livepeer -orchestrator -transcoder --network offchain -serviceAddr 127.0.0.1:8935 -orchAddr 0.0.0.0:8935 -nvidia 0
+./livepeer -orchestrator -transcoder -network offchain -serviceAddr 127.0.0.1:8935 -orchAddr 0.0.0.0:8935 -nvidia 0
 ```
 
 NOTE: Use the `-nvidia` argument to control the GPUs being used.  To use the first two GPUs, specify, `-nvidia 0,1`

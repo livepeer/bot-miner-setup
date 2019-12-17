@@ -75,7 +75,7 @@ version: '3.5'
 services:
   orchestrator:
     image: livepeer/go-livepeer:master
-    command: '-orchestrator -transcoder --network offchain -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -nvidia 0'
+    command: '-orchestrator -transcoder -network offchain -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -nvidia 0'
     ports:
       - 7935:7935
       - 8935:8935
