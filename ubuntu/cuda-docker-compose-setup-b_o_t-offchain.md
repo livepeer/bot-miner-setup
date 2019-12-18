@@ -75,15 +75,19 @@ version: '3.5'
 services:
   orchestrator:
     image: livepeer/go-livepeer:master
-    command: '-orchestrator -network offchain -orchSecret test -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0'
+    command: '-orchestrator -network offchain -orchSecret /secret.txt -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0'
     ports:
       - 7935:7935
       - 8935:8935
+    volumes:
+      - osecret.txt:/secret.txt
   transcoder:
     depends_on:
       - orchestrator
     image: livepeer/go-livepeer:master
-    command: '-transcoder -network offchain -orchAddr orchestrator:8935 -orchSecret test -nvidia 0'
+    command: '-transcoder -network offchain -orchAddr orchestrator:8935 -orchSecret /secret.txt -nvidia 0'
+    volumes:
+      - osecret.txt:/secret.txt
   broadcaster:
     depends_on:
       - orchestrator
@@ -101,6 +105,12 @@ For example, for two Nvidia GPUs, specify `-nvidia 0,1`
 If you don't have any Nvidia GPUs, remove the `-nvidia 0` option from the transcoder container command line.
 
 Hit `CTRL-X` to save and exit.  When prompted, hit the `Y` key followed by `ENTER`.
+
+* Store your orchSecret password in a text file. Replace "secret" with a secret of your own:
+
+```bash
+echo secret > osecret.txt
+```
 
 * Start the B/O/T network using the following command:
 
