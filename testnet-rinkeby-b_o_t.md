@@ -42,10 +42,16 @@ screen
 
 Hit `<ENTER>` a few times to get to a command prompt.
 
+* Store your orchSecret password in a text file. Replace "secret" with a secret of your own:
+
+```bash
+echo secret > osecret.txt
+```
+
 * Run the following command to start the orchestrator:
 
 ```bash
-./livepeer -v 99 -network rinkeby -orchestrator -orchSecret test -pricePerUnit 1 -initializeRound=true -serviceAddr=127.0.0.1:8935 -orchAddr 0.0.0.0:8935
+./livepeer -v 99 -network rinkeby -orchestrator -orchSecret osecret.txt -pricePerUnit 1 -initializeRound=true -serviceAddr=127.0.0.1:8935 -orchAddr 0.0.0.0:8935
 ```
 
 * Once the orchestrator is running, hold `<CTRL>` and type `<A>` then `<D>` to leave the screen session running in the background.
@@ -61,7 +67,7 @@ Hit `<ENTER>` a few times to get to a command prompt.
 * Run the following command to start the transcoder:
 
 ```bash
-./livepeer -v 99 -network rinkeby -transcoder -orchAddr 127.0.0.1:8935 -orchSecret test -nvidia 0
+./livepeer -v 99 -network rinkeby -transcoder -orchAddr 127.0.0.1:8935 -orchSecret osecret.txt -nvidia 0
 ```
 
 * Once the transcoder is running, hold `<CTRL>` and type `<A>` then `<D>` to leave the screen session running in the background.

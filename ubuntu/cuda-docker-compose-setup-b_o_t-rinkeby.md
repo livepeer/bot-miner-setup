@@ -75,17 +75,20 @@ version: '3.5'
 services:
   orchestrator:
     image: livepeer/go-livepeer:master
-    command: '-orchestrator -network rinkeby -orchSecret test -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -pricePerUnit 1 -initializeRound=true'
+    command: '-orchestrator -network rinkeby -orchSecret /secret.txt -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -pricePerUnit 1 -initializeRound=true'
     ports:
       - 7935:7935
       - 8935:8935
     volumes:
       - orchroot:/root
+      - osecret.txt:/secret.txt
   transcoder:
     depends_on:
       - orchestrator
     image: livepeer/go-livepeer:master
-    command: '-transcoder -network rinkeby -orchAddr orchestrator:8935 -orchSecret test -nvidia 0'
+    command: '-transcoder -network rinkeby -orchAddr orchestrator:8935 -orchSecret /secret.txt -nvidia 0'
+    volumes:
+      - osecret.txt:/secret.txt
   broadcaster:
     depends_on:
       - orchestrator
@@ -119,6 +122,12 @@ go-livepeer will prompt for a passphrase.  Enter one and then press `ENTER` to c
 
 After this is done, go-livepeer may shut down.  Feel free to stop it using `CTRL-C` if it doesnt shut down by itself after some time.
 
+* Store your orchSecret password in a text file. Replace "secret" with a secret of your own:
+
+```bash
+echo secret > osecret.txt
+```
+
 * Store your password in a file on disk in a secure location.
 
 ```bash
@@ -130,13 +139,14 @@ echo MyEthPassPhrase > passphrase_orch.txt
 ```yaml
     volumes:
       - orchroot:/root
+      - osecret.txt:/secret.txt
       - ./passphrase_orch.txt:/root/pw.txt
 ```
 
 * Edit the `docker-compose.yml` to add the `ethPassword` argument to the orchestrator command line.  The new command should look like this:
 
 ```bash
--orchestrator -network rinkeby -orchSecret test -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -pricePerUnit 1 -initializeRound=true -ethPassword=/root/pw.txt
+-orchestrator -network rinkeby -orchSecret /secret.txt -serviceAddr orchestrator:8935 -orchAddr 0.0.0.0 -pricePerUnit 1 -initializeRound=true -ethPassword=/root/pw.txt
 ```
 
 * Next, we must initialize an ethereum account for the broadcaster.  Bring up the broadcaster using interactive mode:
