@@ -13,10 +13,6 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets:
-          - transcoder:7935
-        labels:
-          livepeer_node_type: transcoder
-      - targets:
           - orchestrator:7935
         labels:
           livepeer_node_type: orchestrator
